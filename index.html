@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Сегодня в 19:00 — встреча в Surf с Лёхой</title>
+  <meta name="description" content="Сегодня в 19:00 в Surf — живая встреча с Лёхой, профессиональным обжарщиком кофе. Разберём 3 темы и отдельно поговорим, как стать крутым разработчиком." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06131a;
+      --bg2: #0d1f28;
+      --card: rgba(255,255,255,0.08);
+      --line: rgba(255,255,255,0.14);
+      --text: #f7fbfd;
+      --muted: rgba(247,251,253,0.75);
+      --accent: #5df2c1;
+      --accent2: #8ac7ff;
+      --danger: #ff8f66;
+      --shadow: 0 20px 80px rgba(0,0,0,.32);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 20%, rgba(93,242,193,.16), transparent 30%),
+        radial-gradient(circle at 85% 15%, rgba(138,199,255,.18), transparent 28%),
+        radial-gradient(circle at 50% 80%, rgba(255,143,102,.12), transparent 26%),
+        linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%);
+      overflow-x: hidden;
+    }
+
+    .noise, .grid, .blob {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .grid {
+      background-image:
+        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.8), transparent 90%);
+    }
+    .noise {
+      opacity: .06;
+      background-image: radial-gradient(#fff 0.6px, transparent 0.6px);
+      background-size: 12px 12px;
+      animation: drift 20s linear infinite;
+    }
+    .blob::before, .blob::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(50px);
+      opacity: .28;
+      animation: float 9s ease-in-out infinite;
+    }
+    .blob::before {
+      width: 320px; height: 320px;
+      background: var(--accent);
+      top: 6%; left: -60px;
+    }
+    .blob::after {
+      width: 360px; height: 360px;
+      background: var(--accent2);
+      right: -80px; top: 28%;
+      animation-delay: -3s;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      width: min(1160px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    section {
+      padding: 28px 0;
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 32px 0 56px;
+    }
+
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: 32px;
+      padding: 28px;
+      backdrop-filter: blur(18px);
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -20% -20% auto;
+      width: 320px; height: 320px;
+      background: radial-gradient(circle, rgba(93,242,193,.24), transparent 70%);
+      transform: rotate(18deg);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(93,242,193,.12);
+      border: 1px solid rgba(93,242,193,.25);
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    .pulse {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 0 rgba(93,242,193,.7);
+      animation: pulse 1.8s infinite;
+    }
+
+    h1, h2, h3 {
+      font-family: Manrope, Inter, sans-serif;
+      margin: 0;
+      line-height: .98;
+      letter-spacing: -0.04em;
+    }
+
+    h1 {
+      font-size: clamp(44px, 9vw, 112px);
+      margin-top: 18px;
+      max-width: 980px;
+    }
+
+    .hero-accent { color: var(--accent); }
+    .hero-sub {
+      margin-top: 22px;
+      max-width: 760px;
+      font-size: clamp(18px, 2.5vw, 28px);
+      line-height: 1.35;
+      color: var(--muted);
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .meta-chip {
+      padding: 14px 18px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--line);
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 58px;
+      padding: 0 24px;
+      border-radius: 18px;
+      font-weight: 800;
+      font-family: Manrope, sans-serif;
+      font-size: 16px;
+      transition: transform .22s ease, box-shadow .22s ease, background .22s ease;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      color: #062019;
+      background: linear-gradient(135deg, var(--accent), #a6ffd6);
+      box-shadow: 0 12px 28px rgba(93,242,193,.25);
+    }
+    .btn-secondary {
+      color: var(--text);
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--line);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 22px;
+      align-items: stretch;
+      margin-top: 26px;
+    }
+
+    .speaker-card, .quote-card, .topic, .reg-card {
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      backdrop-filter: blur(14px);
+    }
+
+    .speaker-card {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 260px;
+    }
+
+    .speaker-label, .section-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: rgba(247,251,253,.55);
+      margin-bottom: 14px;
+      font-weight: 700;
+    }
+
+    .speaker-name {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800;
+      font-family: Manrope, sans-serif;
+      margin-bottom: 12px;
+    }
+
+    .speaker-desc {
+      font-size: 18px;
+      line-height: 1.5;
+      color: var(--muted);
+      max-width: 520px;
+    }
+
+    .quote-card {
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .quote-card::before {
+      content: "//";
+      position: absolute;
+      right: 18px;
+      top: 6px;
+      font-family: Manrope, sans-serif;
+      font-size: 80px;
+      line-height: 1;
+      color: rgba(255,255,255,.06);
+      font-weight: 800;
+    }
+    .quote {
+      font-size: clamp(22px, 3vw, 34px);
+      font-family: Manrope, sans-serif;
+      font-weight: 700;
+      line-height: 1.15;
+      margin-top: 12px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 22px;
+    }
+    .section-head h2 {
+      font-size: clamp(34px, 6vw, 68px);
+      max-width: 800px;
+    }
+    .section-head p {
+      margin: 0;
+      max-width: 360px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .topics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .topic {
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      min-height: 240px;
+      transform: translateY(0);
+      transition: transform .24s ease, border-color .24s ease;
+    }
+    .topic:hover {
+      transform: translateY(-6px);
+      border-color: rgba(93,242,193,.5);
+    }
+    .topic::after {
+      content: "";
+      position: absolute;
+      inset: auto -40px -50px auto;
+      width: 150px; height: 150px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(93,242,193,.16), transparent 70%);
+    }
+    .topic-num {
+      font-family: Manrope, sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .topic h3 {
+      font-size: clamp(24px, 3vw, 34px);
+      margin-top: 16px;
+      line-height: 1.05;
+    }
+    .topic p {
+      margin: 14px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 16px;
+      max-width: 300px;
+    }
+
+    .dev-spot {
+      margin-top: 18px;
+      padding: 22px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(138,199,255,.14), rgba(93,242,193,.12));
+      border: 1px solid rgba(138,199,255,.25);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+    }
+    .dev-spot strong {
+      display: block;
+      font-family: Manrope, sans-serif;
+      font-size: clamp(24px, 3.5vw, 38px);
+      margin-bottom: 8px;
+    }
+    .dev-spot p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.5;
+    }
+
+    .code-pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      padding: 12px 16px;
+      border-radius: 14px;
+      background: rgba(6,19,26,.45);
+      border: 1px solid rgba(255,255,255,.1);
+      color: var(--accent);
+      white-space: nowrap;
+      animation: blink 2.8s infinite;
+    }
+
+    .reg-card {
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      overflow: hidden;
+      position: relative;
+    }
+    .reg-card::after {
+      content: "";
+      position: absolute;
+      width: 260px; height: 260px;
+      right: -80px; bottom: -100px;
+      background: radial-gradient(circle, rgba(255,143,102,.18), transparent 65%);
+      border-radius: 50%;
+    }
+
+    .reg-copy h2 {
+      font-size: clamp(36px, 5vw, 72px);
+      margin-bottom: 16px;
+    }
+    .reg-copy p {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.6;
+      max-width: 520px;
+    }
+    .reg-list {
+      margin-top: 18px;
+      display: grid;
+      gap: 12px;
+    }
+    .reg-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      color: #fff;
+      font-weight: 600;
+    }
+    .reg-item span:first-child {
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    form {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+    label {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: rgba(247,251,253,.62);
+      font-weight: 700;
+    }
+    input, textarea {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      border-radius: 16px;
+      min-height: 56px;
+      padding: 16px 18px;
+      color: #fff;
+      font: inherit;
+      outline: none;
+      transition: border-color .2s ease, background .2s ease;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    input:focus, textarea:focus {
+      border-color: rgba(93,242,193,.65);
+      background: rgba(255,255,255,.08);
+    }
+    .note {
+      color: rgba(247,251,253,.56);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .footer {
+      padding: 16px 0 40px;
+      color: rgba(247,251,253,.45);
+      font-size: 14px;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(93,242,193,.7); }
+      70% { box-shadow: 0 0 0 12px rgba(93,242,193,0); }
+      100% { box-shadow: 0 0 0 0 rgba(93,242,193,0); }
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0px) translateX(0px); }
+      50% { transform: translateY(28px) translateX(20px); }
+    }
+    @keyframes drift {
+      from { transform: translateY(0); }
+      to { transform: translateY(-12px); }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: .75; }
+      50% { opacity: 1; }
+    }
+
+    @media (max-width: 920px) {
+      .hero-grid,
+      .topics-grid,
+      .reg-card,
+      .dev-spot {
+        grid-template-columns: 1fr;
+      }
+      .section-head {
+        flex-direction: column;
+        align-items: start;
+      }
+      .hero-card, .reg-card, .speaker-card, .quote-card, .topic {
+        border-radius: 24px;
+      }
+      .code-pill { white-space: normal; }
+    }
+
+    @media (max-width: 640px) {
+      .wrap { width: min(100% - 20px, 1160px); }
+      .hero { min-height: auto; padding-top: 18px; }
+      .hero-card, .reg-card, .speaker-card, .quote-card, .topic { padding: 18px; }
+      .meta-chip { width: 100%; }
+      .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="noise"></div>
+  <div class="blob"></div>
+
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-card reveal visible">
+        <div class="eyebrow"><span class="pulse"></span> сегодня / 19:00 / Surf</div>
+        <h1>Встреча с <span class="hero-accent">Лёхой</span>.<br>Кофе, практика и разговор без лишней воды.</h1>
+        <p class="hero-sub">Сегодня собираемся в Surf. Лёха — профессиональный обжарщик кофе и человек, который реально понимает ремесло. Обсудим 3 темы и отдельно разберём, <strong>как можно стать крутым разработчиком</strong>.</p>
+
+        <div class="meta">
+          <div class="meta-chip">📍 Surf</div>
+          <div class="meta-chip">🕖 Сегодня в 19:00</div>
+          <div class="meta-chip">☕ Живой разговор с практиком</div>
+          <div class="meta-chip">💻 Про развитие в разработке — тоже будет</div>
+        </div>
+
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#register">Зарегистрироваться</a>
+          <a class="btn btn-secondary" href="#topics">Смотреть темы</a>
+        </div>
+
+        <div class="hero-grid">
+          <div class="speaker-card reveal">
+            <div>
+              <div class="speaker-label">Спикер</div>
+              <div class="speaker-name">Лёха</div>
+              <div class="speaker-desc">Профессиональный обжарщик, человек с насмотренностью и опытом. Не теоретик из интернета — практик, который знает, как строится вкус, дисциплина и настоящий уровень в своём деле.</div>
+            </div>
+            <div class="speaker-label" style="margin-top:18px">Формат: камерно, по делу, с вопросами и нормальным разговором</div>
+          </div>
+
+          <div class="quote-card reveal">
+            <div class="section-label">Почему стоит прийти</div>
+            <div class="quote">Когда человек реально умеет делать своё дело, разговор почти всегда шире одной профессии.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="topics">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <div class="section-label">Что обсудим</div>
+          <h2>Три темы. Без слайдовой комы.</h2>
+        </div>
+        <p>Сделали структуру простой: чтобы сразу было понятно, зачем идти и что унести с собой после встречи.</p>
+      </div>
+
+      <div class="topics-grid">
+        <article class="topic reveal">
+          <div class="topic-num">Тема 01</div>
+          <h3>Кофе как ремесло</h3>
+          <p>Что отличает человека, который просто «в теме», от того, кто действительно умеет. Вкус, насмотренность, дисциплина, ошибки и путь к уровню.</p>
+        </article>
+
+        <article class="topic reveal">
+          <div class="topic-num">Тема 02</div>
+          <h3>Как растут сильные специалисты</h3>
+          <p>Разберём, как формируется профессионализм: через повторения, качество среды, обратную связь и привычку делать не на отвали.</p>
+        </article>
+
+        <article class="topic reveal">
+          <div class="topic-num">Тема 03</div>
+          <h3>Как стать крутым разработчиком</h3>
+          <p>Да, это тоже обсудим отдельно. Не в духе мотивационной мишуры, а по-человечески: как расти в навыке, мышлении и уровне решений.</p>
+        </article>
+      </div>
+
+      <div class="dev-spot reveal">
+        <div>
+          <strong>Отдельный блок для разработчиков.</strong>
+          <p>Если тебе интересно, как переходят из состояния «что-то делаю» в состояние «на меня можно опереться» — приходи. Поговорим про путь, ошибки, скорость роста и реальный уровень.</p>
+        </div>
+        <div class="code-pill">become_great_dev(today, not_someday)</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="register">
+    <div class="wrap">
+      <div class="reg-card reveal">
+        <div class="reg-copy">
+          <div class="section-label">Регистрация</div>
+          <h2>Забронируй себе место.</h2>
+          <p>Оставь контакт — и мы подтвердим участие. В конце сделали простую форму: главное поле — номер телефона.</p>
+          <div class="reg-list">
+            <div class="reg-item"><span>01</span><span>Главное поле — номер телефона</span></div>
+            <div class="reg-item"><span>02</span><span>Можно оставить имя и короткий комментарий</span></div>
+            <div class="reg-item"><span>03</span><span>После отправки покажем подтверждение прямо на странице</span></div>
+          </div>
+        </div>
+
+        <form id="leadForm">
+          <div class="field">
+            <label for="phone">Номер телефона *</label>
+            <input id="phone" name="phone" type="tel" placeholder="+7 (999) 123-45-67" required />
+          </div>
+          <div class="field">
+            <label for="name">Имя</label>
+            <input id="name" name="name" type="text" placeholder="Как к тебе обращаться" />
+          </div>
+          <div class="field">
+            <label for="note">Комментарий</label>
+            <textarea id="note" name="note" placeholder="Если хочешь — напиши, что тебе особенно интересно обсудить"></textarea>
+          </div>
+          <button class="btn btn-primary" type="submit">Отправить регистрацию</button>
+          <div class="note">* Сейчас форма демонстрационная. Контакт можно быстро привязать к Telegram / Tally / Google Form / webhook.</div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap footer">
+    Сегодня в 19:00 · Surf · Живой разговор, кофе и нормальные темы вместо декоративного нетворкинга.
+  </div>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.16 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    const form = document.getElementById('leadForm');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const phone = document.getElementById('phone').value.trim();
+      if (!phone) return;
+      form.innerHTML = `
+        <div style="padding:22px;border-radius:20px;background:rgba(93,242,193,.12);border:1px solid rgba(93,242,193,.3)">
+          <div style="font-family:Manrope,sans-serif;font-size:28px;font-weight:800;margin-bottom:10px">Готово.</div>
+          <div style="color:rgba(247,251,253,.8);line-height:1.6">Заявка принята. Свяжемся по номеру <strong>${phone}</strong>. Всё прилично, без цирка.</div>
+        </div>`;
+    });
+  </script>
+</body>
+</html>
